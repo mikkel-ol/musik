@@ -14,6 +14,8 @@
   "license": "ISC",
   "homepage": "https://github.com/mikkel-ol/musik",
   "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "discord-music-player": "^7.2.0",
     "discord.js": "^12.3.1",
     "dotenv": "^8.0.0",
     "reflect-metadata": "^0.1.13",
