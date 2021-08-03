@@ -77,5 +77,5 @@ export abstract class Command {
      * @param {Message} message The original message object that triggered the command.
      * @param {string[]} args The arguments that got sent with the message.
      */
-    public abstract async run(message: Message, args: string[]): Promise<void>;
+    public abstract run(message: Message, args: string[]): Promise<void>;
 }
