@@ -36,6 +36,8 @@ export interface BotSettings {
         commands: string;
         events: string;
     };
+    volume: number;
+    fadeTime: number;
 }
 
 export interface BotEvent {

@@ -11,5 +11,7 @@ export const settings: BotSettings = {
     paths: {
         commands: 'src/commands',
         events: 'src/events'
-    }
+    },
+    volume: 50,
+    fadeTime: 2000
 };
