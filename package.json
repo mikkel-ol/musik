@@ -1,21 +1,18 @@
 {
-  "name": "ts-discord-bot-boilerplate",
+  "name": "musik",
   "version": "1.0.0",
-  "description": "A TypeScript Discord bot.",
+  "description": "Yet another Discord bot",
   "main": "src/index.ts",
   "scripts": {
     "start": "tsc && node dist/src/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cornayy/ts-discord-bot-boilerplate.git"
+    "url": "git+https://github.com/mikkel-ol/musik"
   },
-  "author": "Cornayy",
+  "author": "mikkel-ol",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Cornayy/ts-discord-bot-boilerplate/issues"
-  },
-  "homepage": "https://github.com/Cornayy/ts-discord-bot-boilerplate#readme",
+  "homepage": "https://github.com/mikkel-ol/musik",
   "dependencies": {
     "discord.js": "^12.3.1",
     "dotenv": "^8.0.0",
@@ -26,7 +23,7 @@
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
-    "@types/node": "^12.7.3",
+    "@types/node": "^12.20.18",
     "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
