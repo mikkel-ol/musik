@@ -15,7 +15,7 @@
         "moduleResolution": "node",
         "sourceRoot": "src",
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true
+        "emitDecoratorMetadata": true,
     },
     "include": [
         "src"

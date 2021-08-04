@@ -13,7 +13,7 @@ export const Logger = createLogger({
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
         printf(({ message, level, timestamp }) => {
             colorizer.addColors(colors);
-            return colorizer.colorize(level, `[${timestamp}] [${level.toUpperCase()}]: ${message}`);
+            return colorizer.colorize(level, `[${timestamp}] [${level.toUpperCase()}]\t${message}`);
         })
     )
 });
