@@ -212,6 +212,16 @@ export class Player {
         return newVolume;
     }
 
+    public async createProgressBar(message: Message): Promise<string> {
+        return this.player
+            .createProgressBar(message, {
+                size: 30,
+                block: '=',
+                arrow: '>'
+            })
+            .valueOf();
+    }
+
     private getStatus(guildId: string | undefined): Status {
         if (!guildId) {
             // TODO: Custom error type
