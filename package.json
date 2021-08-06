@@ -15,6 +15,7 @@
   "homepage": "https://github.com/mikkel-ol/musik",
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
+    "@sushibtw/youtubei": "^0.0.1-rc.17",
     "@types/express-session": "^1.17.4",
     "@types/express-winston": "^4.0.0",
     "body-parser": "^1.19.0",
@@ -32,9 +33,11 @@
     "passport-oauth2": "^1.6.0",
     "reflect-metadata": "^0.1.13",
     "routing-controllers": "^0.9.0",
+    "spotify-url-info": "^2.2.3",
     "typedi": "^0.8.0",
     "typescript": "^4.3.5",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "ytsr": "^3.5.2"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.1",

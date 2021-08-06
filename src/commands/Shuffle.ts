@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import { Container } from 'typedi';
 import { Command } from '../Command';
-import { Player } from '../Player';
+import { Player } from '../music/Player';
 import { BotClient } from '../types';
 import { Logger } from '../utils/Logger';
 

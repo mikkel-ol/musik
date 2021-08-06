@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import * as dotenv from 'dotenv';
 import { Container } from 'typedi';
 import { Client } from './Client';
-import { Player } from './Player';
+import { Player } from './music/Player';
 
 import { Express } from './Express';
 import Passport from './Passport';

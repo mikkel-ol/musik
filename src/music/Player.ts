@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Message } from 'discord.js';
 import { Service } from 'typedi';
 import { Player as DiscordPlayer, Queue, Song } from 'discord-music-player';
-import { Logger } from './utils/Logger';
-import { settings as configuration } from './config/config';
-import { Client } from './Client';
-import { Status } from './types/status';
+import { settings as configuration } from '../config/config';
+import { Client } from '../Client';
+import { Status } from '../types/status';
 
 @Service()
 export class Player {

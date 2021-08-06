@@ -46,7 +46,8 @@ export default class Passport {
         profile: DiscordStrategy.Profile,
         done: oauth2.VerifyCallback
     ): void {
+        // TODO: Implement storing user
         console.log('Passport callback');
-        return done(null, { id: 1 }, { msg: 'hej' });
+        return done(null, profile);
     }
 }
