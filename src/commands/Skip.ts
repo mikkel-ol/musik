@@ -21,7 +21,7 @@ export default class Skip extends Command {
         const player = Container.get<Player>(Player);
 
         try {
-            const song = await player.skip(message);
+            const song = await player.skip(message.guild?.id!);
 
             await super.respond(message.channel, `Skipped ${song.name}`);
         } catch (e) {

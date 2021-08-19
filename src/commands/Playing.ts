@@ -21,7 +21,7 @@ export default class Playing extends Command {
         const player = Container.get<Player>(Player);
 
         try {
-            const song = await player.playing(message);
+            const song = await player.playing(message.guild?.id!);
 
             await super.respond(message.channel, `Currently playing ${song.name}`);
         } catch (e) {

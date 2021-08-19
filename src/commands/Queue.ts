@@ -21,7 +21,7 @@ export default class Queue extends Command {
         const player = Container.get<Player>(Player);
 
         try {
-            const queue = await player.getQueue(message);
+            const queue = await player.getQueue(message.guild?.id!);
 
             if (!queue) {
                 await super.respond(message.channel, 'Nothing is playing.');

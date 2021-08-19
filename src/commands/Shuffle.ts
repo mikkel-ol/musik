@@ -21,7 +21,7 @@ export default class Shuffle extends Command {
         const player = Container.get<Player>(Player);
 
         try {
-            const newQueue = await player.shuffle(message);
+            const newQueue = await player.shuffle(message.guild?.id!);
 
             await super.respond(message.channel, `Queue has been shuffled`);
         } catch (e) {

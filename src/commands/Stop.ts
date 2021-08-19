@@ -24,7 +24,7 @@ export default class Stop extends Command {
             if (!player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
-                await player.stop(message);
+                await player.stop(message.guild?.id!);
                 await super.respond(message.channel, `Stopped playing.`);
             }
         } catch (e) {

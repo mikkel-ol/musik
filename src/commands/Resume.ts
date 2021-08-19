@@ -24,9 +24,9 @@ export default class Resume extends Command {
             if (player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Already playing.');
             } else {
-                const song = await player.resume(message);
+                await player.resume(message.guild?.id!);
 
-                await super.respond(message.channel, `Resumed ${song.name}`);
+                await super.respond(message.channel, `Resumed`);
             }
         } catch (e) {
             if (e.context === 'QueueIsNull') {

@@ -21,7 +21,7 @@ export default class Clear extends Command {
         const player = Container.get<Player>(Player);
 
         try {
-            const queue = await player.clear(message);
+            player.clear(message.guild?.id!);
 
             await super.respond(message.channel, `Cleared queue.`);
         } catch (e) {

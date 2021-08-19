@@ -24,7 +24,7 @@ export default class Volume extends Command {
             if (!player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
-                const volume = await player.volume(message);
+                const volume = await player.volume(message.guild?.id!);
 
                 await super.respond(message.channel, `Volume is ${volume}%`);
             }

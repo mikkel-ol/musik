@@ -5,6 +5,8 @@ import { Player as DiscordPlayer, Queue, Song } from 'discord-music-player';
 import { settings as configuration } from '../config/config';
 import { Client } from '../Client';
 import { Status } from '../types/status';
+import { NotFoundError } from 'routing-controllers';
+import { MusicPlayerError } from '../types/errors/MusicPlayerError';
 
 @Service()
 export class Player {
@@ -27,172 +29,109 @@ export class Player {
         return guildId ? this.status.get(guildId)?.isPlaying ?? false : false;
     }
 
-    /**
-     * Plays a song on a users current voice channel.
-     * @param message Discord Message object
-     * @returns Promise with found Song object
-     */
-    public async play(message: Message): Promise<Song> {
-        const args = message.content
-            .slice(this.client.settings.prefix.length)
-            .trim()
-            .split(/ +/g);
+    public async play(searchString: string, guildId: string, channelId: string): Promise<Song> {
+        let queue = this.getQueue(guildId);
 
-        const song = this.player.play(message, args.join(' '));
+        if (!queue) queue = this.player.createQueue(guildId);
 
-        if (await song) {
-            this.changeStatus(message.guild?.id, { isPlaying: true });
+        const res = await queue.join(channelId);
+
+        if (res == "NoVoiceChannel") throw new NotFoundError(`Could not join voice channel with ID ${channelId}`);
+
+        const song = await queue.play(searchString);
+
+        if (song) {
+            this.changeStatus(guildId, { isPlaying: true });
         }
 
         return song;
     }
 
-    /**
-     * Pauses a song if currently playing.
-     * @param message Discord Message object
-     * @returns Promise with paused song
-     */
-    public async pause(message: Message): Promise<Song> {
-        const song = this.player.pause(message);
+    public pause(guildId: string): void {
+        const queue = this.getQueue(guildId);
 
-        this.changeStatus(message.guild?.id, { isPlaying: false });
+        const result = queue.setPaused(true);
+
+        if (!result) throw new MusicPlayerError();
+
+        this.changeStatus(guildId, { isPlaying: false });
+    }
+
+    public resume(guildId: string): void {
+        const queue = this.getQueue(guildId);
+
+        queue.setPaused(false);
+
+        this.changeStatus(guildId, { isPlaying: true });
+    }
+
+    public stop(guildId: string): void {
+        const queue = this.getQueue(guildId);
+
+        queue.stop();
+
+        this.changeStatus(guildId, undefined);
+    }
+
+    public playing(guildId: string): Song {
+        const queue = this.getQueue(guildId);
+
+        const song = queue.nowPlaying;
 
         return song;
     }
 
-    /**
-     * Resumes playback.
-     * @param message Discord Message object
-     * @returns Promise with resumed song
-     */
-    public async resume(message: Message): Promise<Song> {
-        const song = this.player.resume(message);
+    public clear(guildId: string): void {
+        const queue = this.getQueue(guildId);
 
-        this.changeStatus(message.guild?.id, { isPlaying: true });
+        queue.clearQueue();
+    }
+
+    public skip(guildId: string): Song {
+        const queue = this.getQueue(guildId);
+
+        const song = queue.skip();
+
+        if (!song) throw new NotFoundError(`Could not skip song on guild with ID ${guildId}`);
 
         return song;
     }
+    
+    public shuffle(guildId: string): Song[] {
+        const queue = this.getQueue(guildId);
 
-    /**
-     * Stops playback completely and empties queue.
-     * @param message Discord Message object
-     * @returns Promise with stopped song
-     */
-    public async stop(message: Message): Promise<Song> {
-        const song = this.player.stop(message);
+        const result = queue.shuffle();
 
-        this.changeStatus(message.guild?.id, undefined);
+        if (!result) throw new MusicPlayerError(`Could not shuffle queue on guild with ID ${guildId}`);
 
-        return song;
+        return result;
     }
 
-    /**
-     * Gets current playing song.
-     * @param message Discord Message object
-     * @returns Promise with current song playing
-     */
-    public async playing(message: Message): Promise<Song> {
-        const song = this.player.nowPlaying(message);
+    public volume(guildId: string, volume?: number): number {
+        const queue = this.getQueue(guildId);
 
-        return song;
-    }
-
-    /**
-     * Clear queue of all songs. Does not stop current playing song.
-     * @param message Discord Message object
-     * @returns Promise with cleared queue
-     */
-    public async clear(message: Message): Promise<Queue> {
-        const queue = this.player.clearQueue(message);
-
-        return queue;
-    }
-
-    /**
-     * Get the current queue of songs.
-     * @param message Discord Message object
-     * @returns Promise with current queue
-     */
-    public async getQueue(message: Message): Promise<Queue> {
-        const queue = this.player.getQueue(message);
-
-        return queue;
-    }
-
-    /**
-     * Skip the current playing song.
-     * @param message Discord Message object
-     * @returns Promise with skipped song
-     */
-    public async skip(message: Message): Promise<Song> {
-        const song = this.player.skip(message);
-
-        return song;
-    }
-
-    /**
-     * Get or set the volume.
-     * @param message Discord Message object
-     * @returns Current or new volume
-     */
-    public async volume(message: Message): Promise<number> {
-        let volume: number;
-
-        const args = message.content
-            .slice(this.client.settings.prefix.length)
-            .trim()
-            .split(/ +/g);
-
-        const newVolume = +args[1];
-
-        if (!newVolume) {
-            volume = this.player.getVolume(message).valueOf();
-        } else {
+        if (!volume) return queue.volume;
+        else {
             // TODO: Check if volume is between 0 and 100
 
-            const song = this.player.setVolume(message, newVolume);
+            const result = queue.setVolume(volume);
 
-            volume = newVolume;
+            if (!result) throw new MusicPlayerError(`Could not set volume on guild with ID ${guildId}`);
         }
 
         return volume;
     }
 
-    /**
-     * Shuffle the queue randomly
-     * @param message Discord Message object
-     * @returns New, shuffled queue
-     */
-    public async shuffle(message: Message): Promise<Song[]> {
-        const newQueue = this.player.shuffle(message);
-
-        return newQueue;
-    }
-
-    /**
-     * Fades volume.
-     * @param message Discord Message object
-     * @returns Promise with new volume or undefined if already fading
-     */
-    public async fade(message: Message): Promise<number | undefined> {
-        const args = message.content
-            .slice(this.client.settings.prefix.length)
-            .trim()
-            .split(/ +/g);
-
-        const newVolume = +args[1];
-
-        // TODO: Maybe throw here instead
-        if (!newVolume) return undefined;
-
-        const status = this.getStatus(message.guild?.id);
+    public fade(guildId: string, volume: number): number | undefined {
+        const queue = this.getQueue(guildId);
+        const status = this.getStatus(guildId);
 
         if (status.isFading === true) return undefined;
 
         status.isFading = true;
 
-        const currentVol = this.player.getVolume(message).valueOf();
-        const diff = newVolume - currentVol;
+        const currentVol = queue.volume;
+        const diff = volume - currentVol;
 
         const noOfSteps = 20;
         let i = 0;
@@ -206,21 +145,27 @@ export class Player {
 
             const tempVolume = currentVol + (diff / noOfSteps) * i;
 
-            this.player.setVolume(message, tempVolume);
+            queue.setVolume(tempVolume);
         }, this.client.settings.fadeTime / noOfSteps);
 
-        return newVolume;
+        return volume;
+    }
+    
+    public getQueue(guildId: string): Queue {
+        const queue = this.player.getQueue(guildId);
+
+        if (!queue) throw new NotFoundError(`Could not find any queue on guild ${guildId}`);
+
+        return queue;
     }
 
-    public async createProgressBar(message: Message): Promise<string> {
-        return this.player
-            .createProgressBar(message, {
-                size: 30,
-                block: '=',
-                arrow: '>'
-            })
-            .valueOf();
-    }
+    /*
+    *
+    *
+    * Private
+    *
+    * 
+    */
 
     private getStatus(guildId: string | undefined): Status {
         if (!guildId) {

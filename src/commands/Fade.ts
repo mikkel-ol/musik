@@ -24,9 +24,16 @@ export default class Fade extends Command {
             if (!player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
-                const volume = await player.fade(message);
+                const args = message.content
+                    .slice(this.client.settings.prefix.length)
+                    .trim()
+                    .split(/ +/g);
 
-                if (volume) await super.respond(message.channel, `Fading volume to ${volume}%`);
+                const volume = +args[1];
+
+                const result = player.fade(message.guild?.id!, volume);
+
+                if (result) await super.respond(message.channel, `Fading volume to ${volume}%`);
                 else await super.respond(message.channel, 'Already fading');
             }
         } catch (e) {

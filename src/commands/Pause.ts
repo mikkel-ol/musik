@@ -24,9 +24,9 @@ export default class Pause extends Command {
             if (!player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
-                const song = await player.pause(message);
+                player.pause(message.guild?.id!);
 
-                await super.respond(message.channel, `Paused ${song.name}`);
+                await super.respond(message.channel, `Paused.`);
             }
         } catch (e) {
             if (e.context === 'QueueIsNull') {
