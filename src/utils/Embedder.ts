@@ -1,72 +1,128 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Song } from 'discord-music-player';
-import { EmbedField, Guild, MessageEmbed } from 'discord.js';
+import { Channel, EmbedField, Guild, MessageEmbed, TextChannel } from 'discord.js';
 import { Service } from 'typedi';
 import { EmbedConstruct } from '../types/embedder/EmbedConstruct';
 import { GuildNotFoundError } from '../types/errors/GuildNotFoundError';
 import '../extensions/StringExtensions';
+import { Client } from '../Client';
 
 @Service()
 export class Embedder {
-    private embeds: Map<Guild, EmbedConstruct>;
+    private embedMap: Map<string, EmbedConstruct>;
 
-    constructor() {
-        this.embeds = new Map<Guild, EmbedConstruct>();
+    constructor(private client: Client) {
+        this.embedMap = new Map<string, EmbedConstruct>();
     }
 
-    public generate(guild: Guild, song: Song): MessageEmbed {
-        const newEmbed = new MessageEmbed();
+    public add(guildId: string, song: Song, channelId: string) {
+        const embedConstr = this.embedMap.get(guildId);
 
-        const title =
-            song.name.substr(0, 50).length < song.name.length
-                ? `${song.name.shorten(50)}`
-                : song.name;
+        if (!embedConstr) {
+            if (!channelId) throw new Error(`Cannot initiate message embed without a text channel`);
+            this.generate(guildId, song, channelId);
+        } else {
+            embedConstr.queue.push(song);
+        }
 
-        newEmbed
-            .setThumbnail(song.thumbnail.valueOf())
+        this.update(guildId);
+    }
+
+    public pop() {
+
+    }
+
+    public pause() {
+
+    }
+
+    public async patch(guildId: string) {
+        const embedConstr = this.embedMap.get(guildId);
+
+        if (!embedConstr) throw new GuildNotFoundError(`Could not find guild with ID ${guildId}`);
+
+        const channel = await this.client.channels.fetch(embedConstr.channel) as TextChannel;
+
+        await channel.send(embedConstr.embed);
+    }
+
+    /**
+     * 
+     * @param guildId 
+     */
+    private update(guildId: string) {
+        const embedConstr = this.embedMap.get(guildId);
+
+        if (!embedConstr) throw new GuildNotFoundError(`Could not find guild with ID ${guildId}`);
+
+        const embed = embedConstr.embed;
+        const currentSong = embedConstr.queue[0];
+
+        const title = this.makeSongTitle(currentSong);
+
+        embed
+            .setThumbnail(currentSong.thumbnail.valueOf())
             .setTitle(title)
-            .setURL(song.url.valueOf())
-            .setImage('https://media.tenor.com/images/42d860bb74f3f334d569f9dad53fcc60/tenor.gif')
-            .setAuthor('Playing', guild.client.user?.avatarURL()!);
+            .setURL(currentSong.url.valueOf())
+            .setAuthor(embedConstr.state, this.client.user?.avatarURL()!);
+            
+        this.makeQueueField(embedConstr);
+    }
+
+    /**
+     * 
+     * @param guildId 
+     * @param song 
+     * @param channelId 
+     * @returns 
+     */
+    private generate(guildId: string, song: Song, channelId: string): MessageEmbed {
+        const newEmbed = new MessageEmbed();
 
         const songArray = new Array<Song>();
 
-        this.embeds.set(guild, {
+        this.embedMap.set(guildId, {
+            state: undefined,
             queue: songArray,
-            embed: newEmbed
+            embed: newEmbed,
+            channel: channelId
         });
 
         return newEmbed;
     }
 
-    public queue(guild: Guild, song: Song): MessageEmbed {
-        const embedConstruct = this.embeds.get(guild);
+    /**
+     * 
+     * @param embedConstr 
+     * @returns 
+     */
+    private makeQueueField(embedConstr: EmbedConstruct): EmbedField | undefined {
+        if (embedConstr.queue.length <= 1) return undefined;
 
-        if (!embedConstruct) throw new GuildNotFoundError();
+        let queueField = {
+            name: 'Queue:',
+            value: '',
+            inline: false
+        } as EmbedField;
 
-        embedConstruct.queue.push(song);
-
-        let queueField = embedConstruct.embed.fields[0];
-
-        // no queue atm
-        if (!queueField) {
-            queueField = {
-                name: 'Queue:',
-                value: '',
-                inline: false
-            } as EmbedField;
+        // build field
+        for (let i = 1; i < embedConstr.queue.length; i += 1) {
+            queueField.value += `${i}: ${embedConstr.queue[i].name.shorten(50)}\n`;
         }
 
-        // clear field
-        queueField.value = '';
+        embedConstr.embed.fields[0] = queueField;
 
-        // rebuild field
-        for (let i = 0; i < embedConstruct.queue.length; i += 1) {
-            queueField.value += `${i + 1}: ${song.name.shorten(50)}\n`;
-        }
+        return queueField;
+    }
 
-        embedConstruct.embed.fields[0] = queueField;
-
-        return embedConstruct.embed;
+    /**
+     * Helper function to format song title to fit into message
+     * @param song The Song object with title
+     * @returns Formatted song title
+     */
+    private makeSongTitle(song: Song): string {
+        return song.name.substr(0, 50).length < song.name.length
+            ? `${song.name.shorten(50)}`
+            : song.name;
     }
 }

@@ -35,15 +35,10 @@ export default class Play extends Command {
         try {
             const song = await player.play(search, message.guild?.id!, message.member?.voice.channelID!);
             
-            // const queue = await player.getQueue(message.guild?.id!);
+            embedder.add(message.guild?.id!, song, message.channel?.id!);
+            embedder.patch(message.guild?.id!);
 
-            // let embed;
-            // if (queue.songs.length > 1) embed = embedder.queue(message.guild!, song);
-            // else embed = embedder.generate(message.guild!, song);
-
-            // await super.respond(message.channel, embed);
-
-            await super.respond(message.channel, `Playing ${song.name}`);
+            //await super.respond(message.channel, `Playing ${song.name}`);
         } catch (e) {
             if (e.context === 'VoiceChannelTypeInvalid') {
                 await super.respond(message.channel, 'Join a voice channel to play music.');

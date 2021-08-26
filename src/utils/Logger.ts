@@ -1,6 +1,6 @@
 import { createLogger, transports as Transports, format, addColors } from 'winston';
 
-const { printf, combine, timestamp, colorize } = format;
+const { printf, combine, timestamp, colorize, errors } = format;
 const colorizer = colorize();
 
 const colors = {
@@ -10,10 +10,11 @@ const colors = {
 export const Logger = createLogger({
     transports: new Transports.Console(),
     format: combine(
+        errors({ stack: true }),
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        printf(({ message, level, timestamp }) => {
+        printf(({ message, level, timestamp, stack }) => {
             colorizer.addColors(colors);
-            return colorizer.colorize(level, `[${timestamp}] [${level.toUpperCase()}]\t${message}`);
+            return colorizer.colorize(level, `[${timestamp}] [${level.toUpperCase()}]\t${message}${stack ? "\n" + stack : ""}`);
         })
     )
 });

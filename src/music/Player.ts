@@ -30,11 +30,15 @@ export class Player {
     }
 
     public async play(searchString: string, guildId: string, channelId: string): Promise<Song> {
-        let queue = this.getQueue(guildId);
+        let queue;
 
-        if (!queue) queue = this.player.createQueue(guildId);
+        try {
+            queue = this.getQueue(guildId);
+        } catch(e) {
+            queue = this.player.createQueue(guildId);
+        }
 
-        const res = await queue.join(channelId);
+        const res = await queue.join("697056752339910669");
 
         if (res == "NoVoiceChannel") throw new NotFoundError(`Could not join voice channel with ID ${channelId}`);
 
