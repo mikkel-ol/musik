@@ -20,18 +20,16 @@ export default class Skip extends Command {
     public async run(message: Message): Promise<void> {
         const player = Container.get<Player>(Player);
 
+        message.delete();
+
         try {
             const song = await player.skip(message.guild?.id!);
-
-            await super.respond(message.channel, `Skipped ${song.name}`);
-        } catch (e) {
+        } catch (e: any) {
             if (e.context === 'QueueIsNull') {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
                 Logger.error(e);
             }
-        } finally {
-            message.delete();
         }
     }
 }

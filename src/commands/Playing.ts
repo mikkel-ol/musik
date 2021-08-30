@@ -18,20 +18,21 @@ export default class Playing extends Command {
     }
 
     public async run(message: Message): Promise<void> {
-        const player = Container.get<Player>(Player);
+        // ! Disabled - no need with Embedder
+        // const player = Container.get<Player>(Player);
 
-        try {
-            const song = await player.playing(message.guild?.id!);
+        // try {
+        //     const song = await player.playing(message.guild?.id!);
 
-            await super.respond(message.channel, `Currently playing ${song.name}`);
-        } catch (e) {
-            if (e.context === 'QueueIsNull') {
-                await super.respond(message.channel, 'Nothing is playing.');
-            } else {
-                Logger.error(e);
-            }
-        } finally {
-            message.delete();
-        }
+        //     await super.respond(message.channel, `Currently playing ${song.name}`);
+        // } catch (e: any) {
+        //     if (e.context === 'QueueIsNull') {
+        //         await super.respond(message.channel, 'Nothing is playing.');
+        //     } else {
+        //         Logger.error(e);
+        //     }
+        // } finally {
+        //     message.delete();
+        // }
     }
 }

@@ -3,6 +3,7 @@ import { Container } from 'typedi';
 import { Command } from '../Command';
 import { Player } from '../music/Player';
 import { BotClient } from '../types';
+import { Embedder } from '../utils/Embedder';
 import { Logger } from '../utils/Logger';
 
 export default class Shuffle extends Command {
@@ -19,19 +20,19 @@ export default class Shuffle extends Command {
 
     public async run(message: Message): Promise<void> {
         const player = Container.get<Player>(Player);
+        const embedder = Container.get<Embedder>(Embedder);
+
+        message.delete();
 
         try {
             const newQueue = await player.shuffle(message.guild?.id!);
-
-            await super.respond(message.channel, `Queue has been shuffled`);
-        } catch (e) {
+            await embedder.update(message.guild?.id!);
+        } catch (e: any) {
             if (e.context === 'QueueIsNull') {
                 await super.respond(message.channel, 'Nothing in queue.');
             } else {
                 Logger.error(e);
             }
-        } finally {
-            message.delete();
         }
     }
 }

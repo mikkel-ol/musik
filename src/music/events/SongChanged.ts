@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Queue, Song } from 'discord-music-player';
-import { Message as DiscordMessage } from 'discord.js';
+import Container from 'typedi';
 import { BotEvent } from '../../types';
+import { Embedder } from '../../utils/Embedder';
 import { Player } from '../Player';
 
 export default class SongChanged implements BotEvent {
     constructor(private player: Player) {}
 
     public async run(args: any): Promise<void> {
-        const [queue, newSong, oldSong]: [Queue, Song, Song] = args;
+        const embedder = Container.get<Embedder>(Embedder);
 
-        console.log(`${newSong} is now playing.`);
+        const [queue, newSong, oldSong]: [Queue, Song, Song] = args;      
+
+        await embedder.pop(queue.guild.id);
     }
 }

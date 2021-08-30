@@ -20,18 +20,18 @@ export default class Clear extends Command {
     public async run(message: Message): Promise<void> {
         const player = Container.get<Player>(Player);
 
+        message.delete();
+
         try {
             player.clear(message.guild?.id!);
 
             await super.respond(message.channel, `Cleared queue.`);
-        } catch (e) {
+        } catch (e: any) {
             if (e.context === 'QueueIsNull') {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
                 Logger.error(e);
             }
-        } finally {
-            message.delete();
         }
     }
 }

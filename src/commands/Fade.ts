@@ -20,6 +20,8 @@ export default class Fade extends Command {
     public async run(message: Message): Promise<void> {
         const player = Container.get<Player>(Player);
 
+        message.delete();
+
         try {
             if (!player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Nothing is playing.');
@@ -33,17 +35,14 @@ export default class Fade extends Command {
 
                 const result = player.fade(message.guild?.id!, volume);
 
-                if (result) await super.respond(message.channel, `Fading volume to ${volume}%`);
-                else await super.respond(message.channel, 'Already fading');
+                // result will be true or false depending if already fading
             }
-        } catch (e) {
+        } catch (e: any) {
             if (e.context === 'someerrortype') {
                 //
             } else {
                 Logger.error(e);
             }
-        } finally {
-            message.delete();
         }
     }
 }

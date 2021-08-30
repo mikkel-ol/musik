@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { Player as DiscordPlayer, Queue, Song } from 'discord-music-player';
 import { settings as configuration } from '../config/config';
 import { Client } from '../Client';
@@ -7,6 +7,7 @@ import { Status } from '../types/status';
 import { NotFoundError } from 'routing-controllers';
 import { MusicPlayerError } from '../types/errors/MusicPlayerError';
 import { PlayerManager } from '../managers/PlayerManager';
+import { Embedder } from '../utils/Embedder';
 
 @Service()
 export class Player {
@@ -114,7 +115,7 @@ export class Player {
     public volume(guildId: string, volume?: number): number {
         const queue = this.getQueue(guildId);
 
-        if (!volume) return queue.volume;
+        if (!volume) return queue.volume * 2 // ! weird half thing;
         else {
             // TODO: Check if volume is between 0 and 100
 
@@ -127,10 +128,12 @@ export class Player {
     }
 
     public fade(guildId: string, volume: number): number | undefined {
+        const embedder = Container.get<Embedder>(Embedder);
+
         const queue = this.getQueue(guildId);
         const status = this.getStatus(guildId);
 
-        if (status.isFading === true) return undefined;
+        if (status.isFading === true || !volume) return undefined;
 
         status.isFading = true;
 
@@ -139,7 +142,7 @@ export class Player {
 
         const noOfSteps = 20;
         let i = 0;
-        const timer = setInterval(() => {
+        const timer = setInterval(async () => {
             i += 1;
 
             if (i === noOfSteps) {
@@ -147,9 +150,10 @@ export class Player {
                 clearInterval(timer);
             }
 
-            const tempVolume = currentVol + (diff / noOfSteps) * i;
-
+            const tempVolume = currentVol + (diff / noOfSteps) * i;            
+            
             queue.setVolume(tempVolume);
+            if (i % 6 === 0 || !status.isFading) embedder.update(guildId);
         }, this.client.settings.fadeTime / noOfSteps);
 
         return volume;
@@ -170,6 +174,10 @@ export class Player {
     *
     * 
     */
+
+    private setVolume(guildId: string, vol: number) {
+        this.player.getQueue(guildId)?.setVolume(vol);
+    }
 
     private getStatus(guildId: string | undefined): Status {
         if (!guildId) {

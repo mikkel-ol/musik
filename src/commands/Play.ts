@@ -23,6 +23,8 @@ export default class Play extends Command {
         const player = Container.get<Player>(Player);
         const embedder = Container.get<Embedder>(Embedder);
 
+        message.delete();
+
         const args = message.content
             .slice(this.client.settings.prefix.length)
             .trim()
@@ -35,16 +37,13 @@ export default class Play extends Command {
         try {
             const song = await player.play(search, message.guild?.id!, message.member?.voice.channelId!);
             
-            embedder.add(message.guild?.id!, song, message.channel?.id!);
-            embedder.patch(message.guild?.id!);
-        } catch (e) {
+            await embedder.add(message.guild?.id!, song, message.channel?.id!);
+        } catch (e: any) {
             if (e.context === 'VoiceChannelTypeInvalid') {
                 await super.respond(message.channel, 'Join a voice channel to play music.');
             } else {
                 Logger.error(e);
             }
-        } finally {
-            message.delete();
         }
     }
 }

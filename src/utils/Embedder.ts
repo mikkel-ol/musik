@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Song } from 'discord-music-player';
 import { Channel, EmbedField, Guild, MessageEmbed, TextChannel } from 'discord.js';
-import { Service } from 'typedi';
+import Container, { Service } from 'typedi';
 import { EmbedConstruct } from '../types/embedder/EmbedConstruct';
 import { GuildNotFoundError } from '../types/errors/GuildNotFoundError';
 import '../extensions/StringExtensions';
 import { Client } from '../Client';
 import { Player } from '../music/Player';
 import { PlayerState } from '../music/PlayerState';
+import { NotFoundError } from 'routing-controllers';
 
 @Service()
 export class Embedder {
@@ -17,7 +18,7 @@ export class Embedder {
         this.embedMap = new Map<string, EmbedConstruct>();
     }
 
-    public add(guildId: string, song: Song, channelId: string) {
+    public async add(guildId: string, song: Song, channelId: string) {
         let embedConstr = this.embedMap.get(guildId);
 
         if (!embedConstr) {
@@ -29,23 +30,89 @@ export class Embedder {
         embedConstr!.state = PlayerState.PLAYING;
         embedConstr!.queue.push(song);
 
-        this.update(guildId);
+        await this.update(guildId);
     }
 
-    public pop() {
+    public async pop(guildId: string) {
+        const embedConstr = this.getConstruct(guildId);
 
+        embedConstr.queue.shift();
+
+        await this.update(guildId);
     }
 
-    public pause() {
+    public async pause(guildId: string) {
+        const embedConstr = this.getConstruct(guildId);
 
+        embedConstr.state = PlayerState.PAUSED;
+
+        await this.update(guildId);
     }
 
-    public async patch(guildId: string) {
+    public async resume(guildId: string) {
+        const embedConstr = this.getConstruct(guildId);
+
+        embedConstr.state = PlayerState.PLAYING;
+
+        await this.update(guildId);
+    }
+
+    public async stop(guildId: string) {
+        const embedConstr = this.getConstruct(guildId);
+
+        embedConstr.queue = [];
+
+        await this.update(guildId);
+    }
+
+    public async update(guildId: string) {
+        const player = Container.get<Player>(Player);
+        
         const embedConstr = this.embedMap.get(guildId);
 
         if (!embedConstr) throw new GuildNotFoundError(`Could not find guild with ID ${guildId}`);
 
-        const channel = await this.client.channels.fetch(embedConstr.channel) as TextChannel;
+        const embed = embedConstr.embed;
+
+        if (embedConstr.queue.length === 0) {
+            embedConstr.state = PlayerState.STOPPED;
+
+            embed
+                .setThumbnail("")
+                .setTitle("")
+                .setURL("")
+                .setAuthor(embedConstr.state!, this.client.user?.avatarURL()!)
+                .setFooter("");
+
+        } else {
+            if (embedConstr.queue.length === 1) embed.fields.pop(); // removes queue field
+            
+            const currentSong = embedConstr.queue[0];
+
+            const title = this.makeSongTitle(currentSong);
+
+            embed
+                .setThumbnail(currentSong.thumbnail.valueOf())
+                .setTitle(title)
+                .setURL(currentSong.url.valueOf())
+                .setAuthor(embedConstr.state!, this.client.user?.avatarURL()!)
+                .setFooter(`Volume: ${player.volume(guildId)}%`);
+        }
+
+        this.makeQueueField(embedConstr);
+        await this.patch(guildId);
+    }
+
+    /**
+     *
+     * @param guildId
+     */
+    private async patch(guildId: string) {
+        const embedConstr = this.embedMap.get(guildId);
+
+        if (!embedConstr) throw new GuildNotFoundError(`Could not find guild with ID ${guildId}`);
+
+        const channel = (await this.client.channels.fetch(embedConstr.channel)) as TextChannel;
 
         if (embedConstr.messageId) {
             const msg = await channel.messages.fetch(embedConstr.messageId);
@@ -57,34 +124,11 @@ export class Embedder {
     }
 
     /**
-     * 
-     * @param guildId 
-     */
-    private update(guildId: string) {
-        const embedConstr = this.embedMap.get(guildId);
-
-        if (!embedConstr) throw new GuildNotFoundError(`Could not find guild with ID ${guildId}`);
-
-        const embed = embedConstr.embed;
-        const currentSong = embedConstr.queue[0];
-
-        const title = this.makeSongTitle(currentSong);
-
-        embed
-            .setThumbnail(currentSong.thumbnail.valueOf())
-            .setTitle(title)
-            .setURL(currentSong.url.valueOf())
-            .setAuthor(embedConstr.state!, this.client.user?.avatarURL()!);
-            
-        this.makeQueueField(embedConstr);
-    }
-
-    /**
-     * 
-     * @param guildId 
-     * @param song 
-     * @param channelId 
-     * @returns 
+     *
+     * @param guildId
+     * @param song
+     * @param channelId
+     * @returns
      */
     private generate(guildId: string, channelId: string): MessageEmbed {
         const newEmbed = new MessageEmbed();
@@ -103,9 +147,9 @@ export class Embedder {
     }
 
     /**
-     * 
-     * @param embedConstr 
-     * @returns 
+     *
+     * @param embedConstr
+     * @returns
      */
     private makeQueueField(embedConstr: EmbedConstruct): EmbedField | undefined {
         if (embedConstr.queue.length <= 1) return undefined;
@@ -135,5 +179,13 @@ export class Embedder {
         return song.name.substr(0, 50).length < song.name.length
             ? `${song.name.shorten(50)}`
             : song.name;
+    }
+
+    private getConstruct(guildId: string) {
+        const embedConstr = this.embedMap.get(guildId);
+
+        if (!embedConstr) throw new NotFoundError(`Could not find guild with ID ${guildId}`);
+
+        return embedConstr;
     }
 }

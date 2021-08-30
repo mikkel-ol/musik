@@ -18,26 +18,27 @@ export default class Queue extends Command {
     }
 
     public async run(message: Message): Promise<void> {
-        const player = Container.get<Player>(Player);
+        // ! Disabled - no need with Embedder
+//         const player = Container.get<Player>(Player);
 
-        try {
-            const queue = await player.getQueue(message.guild?.id!);
+//         try {
+//             const queue = await player.getQueue(message.guild?.id!);
 
-            if (!queue) {
-                await super.respond(message.channel, 'Nothing is playing.');
-                return;
-            }
+//             if (!queue) {
+//                 await super.respond(message.channel, 'Nothing is playing.');
+//                 return;
+//             }
 
-            const msg = `Queue:
+//             const msg = `Queue:
 
-${queue.songs.map(song => song.name).join('\n')}
-`;
+// ${queue.songs.map(song => song.name).join('\n')}
+// `;
 
-            await super.respond(message.channel, msg);
-        } catch (e) {
-            Logger.error(e);
-        } finally {
-            message.delete();
-        }
+//             await super.respond(message.channel, msg);
+//         } catch (e: any) {
+//             Logger.error(e);
+//         } finally {
+//             message.delete();
+//         }
     }
 }

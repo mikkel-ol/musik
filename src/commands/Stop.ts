@@ -3,6 +3,7 @@ import { Container } from 'typedi';
 import { Command } from '../Command';
 import { Player } from '../music/Player';
 import { BotClient } from '../types';
+import { Embedder } from '../utils/Embedder';
 import { Logger } from '../utils/Logger';
 
 export default class Stop extends Command {
@@ -19,22 +20,23 @@ export default class Stop extends Command {
 
     public async run(message: Message): Promise<void> {
         const player = Container.get<Player>(Player);
+        const embedder = Container.get<Embedder>(Embedder);
+
+        message.delete();
 
         try {
             if (!player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
                 await player.stop(message.guild?.id!);
-                await super.respond(message.channel, `Stopped playing.`);
+                await embedder.stop(message.guild?.id!);
             }
-        } catch (e) {
+        } catch (e: any) {
             if (e.context === 'someerrortype') {
                 //
             } else {
                 Logger.error(e);
             }
-        } finally {
-            message.delete();
         }
     }
 }
