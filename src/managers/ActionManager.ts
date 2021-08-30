@@ -43,7 +43,7 @@ export class ActionManager {
      * @param {BotClient} client The original client, for access to the configuration.
      */
     public initializeEvents(client: BotClient): void {
-        const { events } = client.settings.paths;
+        const events = client.settings.paths.events.bot;
 
         readdir(events, (err, files) => {
             if (err) Logger.error(err);

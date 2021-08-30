@@ -5,5 +5,6 @@ export interface EmbedConstruct {
     state: string | undefined;
     queue: Song[];
     embed: MessageEmbed;
-    channel: string
+    channel: string,
+    messageId: string | undefined,
 }

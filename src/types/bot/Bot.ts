@@ -9,7 +9,8 @@ import {
     Guild,
     User,
     Collection,
-    NewsChannel
+    NewsChannel,
+    TextBasedChannels
 } from 'discord.js';
 import { Command } from '../../Command';
 
@@ -32,9 +33,13 @@ export interface BotSettings {
     clientOptions?: ClientOptions;
     token?: string;
     prefix: string;
+    intents: number[];
     paths: {
         commands: string;
-        events: string;
+        events: {
+            bot: string;
+            player: string;
+        }
     };
     volume: number;
     fadeTime: number;
@@ -49,5 +54,5 @@ export interface UserCooldown {
     guild: Guild;
 }
 
-export type AnyChannel = TextChannel | DMChannel | NewsChannel;
+export type AnyChannel = TextChannel | TextBasedChannels | DMChannel | NewsChannel;
 export type EmbedOrMessage = MessageEmbed | string;

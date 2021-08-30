@@ -6,6 +6,8 @@ import { EmbedConstruct } from '../types/embedder/EmbedConstruct';
 import { GuildNotFoundError } from '../types/errors/GuildNotFoundError';
 import '../extensions/StringExtensions';
 import { Client } from '../Client';
+import { Player } from '../music/Player';
+import { PlayerState } from '../music/PlayerState';
 
 @Service()
 export class Embedder {
@@ -16,14 +18,16 @@ export class Embedder {
     }
 
     public add(guildId: string, song: Song, channelId: string) {
-        const embedConstr = this.embedMap.get(guildId);
+        let embedConstr = this.embedMap.get(guildId);
 
         if (!embedConstr) {
             if (!channelId) throw new Error(`Cannot initiate message embed without a text channel`);
-            this.generate(guildId, song, channelId);
-        } else {
-            embedConstr.queue.push(song);
+            this.generate(guildId, channelId);
+            embedConstr = this.embedMap.get(guildId);
         }
+
+        embedConstr!.state = PlayerState.PLAYING;
+        embedConstr!.queue.push(song);
 
         this.update(guildId);
     }
@@ -43,7 +47,13 @@ export class Embedder {
 
         const channel = await this.client.channels.fetch(embedConstr.channel) as TextChannel;
 
-        await channel.send(embedConstr.embed);
+        if (embedConstr.messageId) {
+            const msg = await channel.messages.fetch(embedConstr.messageId);
+            msg.edit({ embeds: [embedConstr.embed] });
+        } else {
+            const msg = await channel.send({ embeds: [embedConstr.embed] });
+            embedConstr.messageId = msg.id;
+        }
     }
 
     /**
@@ -64,7 +74,7 @@ export class Embedder {
             .setThumbnail(currentSong.thumbnail.valueOf())
             .setTitle(title)
             .setURL(currentSong.url.valueOf())
-            .setAuthor(embedConstr.state, this.client.user?.avatarURL()!);
+            .setAuthor(embedConstr.state!, this.client.user?.avatarURL()!);
             
         this.makeQueueField(embedConstr);
     }
@@ -76,7 +86,7 @@ export class Embedder {
      * @param channelId 
      * @returns 
      */
-    private generate(guildId: string, song: Song, channelId: string): MessageEmbed {
+    private generate(guildId: string, channelId: string): MessageEmbed {
         const newEmbed = new MessageEmbed();
 
         const songArray = new Array<Song>();
@@ -85,7 +95,8 @@ export class Embedder {
             state: undefined,
             queue: songArray,
             embed: newEmbed,
-            channel: channelId
+            channel: channelId,
+            messageId: undefined
         });
 
         return newEmbed;

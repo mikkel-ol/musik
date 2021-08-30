@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Message } from 'discord.js';
 import { Service } from 'typedi';
 import { Player as DiscordPlayer, Queue, Song } from 'discord-music-player';
 import { settings as configuration } from '../config/config';
@@ -7,17 +6,20 @@ import { Client } from '../Client';
 import { Status } from '../types/status';
 import { NotFoundError } from 'routing-controllers';
 import { MusicPlayerError } from '../types/errors/MusicPlayerError';
+import { PlayerManager } from '../managers/PlayerManager';
 
 @Service()
 export class Player {
     private player: DiscordPlayer;
     private status = new Map<string, Status>();
 
-    constructor(private client: Client) {
+    constructor(private client: Client, private actionManager: PlayerManager) {
         this.player = new DiscordPlayer(client, {
             leaveOnEmpty: false,
             volume: configuration.volume
         });
+
+        this.actionManager.initializeEvents(client, this.player);
     }
 
     /**
@@ -38,9 +40,7 @@ export class Player {
             queue = this.player.createQueue(guildId);
         }
 
-        const res = await queue.join("697056752339910669");
-
-        if (res == "NoVoiceChannel") throw new NotFoundError(`Could not join voice channel with ID ${channelId}`);
+        await queue.join(channelId);
 
         const song = await queue.play(searchString);
 
