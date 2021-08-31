@@ -1,0 +1,42 @@
+.container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 6rem;
+  margin: 0;
+}
+
+.login-button {
+  height: 55px;
+  width: 250px;
+  margin: auto;
+
+  display: inline-block;
+  background-color: #7289da;
+
+  line-height: 45px;
+  border: none;
+  border-radius: 3px;
+
+  cursor: pointer;
+  outline: none;
+
+  font-size: 1.1em;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+
+  transition: background-color 0.17s ease, color 0.17s ease;
+
+  &:hover {
+    background: #677bc4;
+  }
+
+  &:active {
+    background: #5b6eae;
+  }
+}

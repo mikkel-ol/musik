@@ -1,11 +1,15 @@
-import { JsonController, NotFoundError, Post } from 'routing-controllers';
+import { User } from 'discord.js';
+import { Authorized, CurrentUser, Get, JsonController, NotFoundError, Post } from 'routing-controllers';
 import { Service } from 'typedi';
-import { Client } from '../../Client';
-import { Player } from '../../music/Player';
 
 @Service()
 //@Authorized()
 @JsonController('/users')
 export class UsersController {
-    constructor(private player: Player, private client: Client) { }
+    constructor() { }
+
+    @Get("/@me")
+    async play(@CurrentUser() user?: any): Promise<User> {
+        return user;
+    }
 }

@@ -5,6 +5,7 @@ import * as expressWinston from 'express-winston';
 import * as express from 'express';
 import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
+import * as cors from 'cors';
 import { Logger } from './utils/Logger';
 import { MusicController } from './api/controllers/MusicController';
 import { ErrorHandler } from './api/middlewares/ErrorHandler';
@@ -27,6 +28,11 @@ export class Express {
         useContainer(Container);
 
         this._app = express();
+
+        this._app.use(cors({
+            origin: [process.env.CORS__SPA!],
+            credentials: true
+        }));
 
         const sessionConf: session.SessionOptions = {
             secret: process.env.SESSION_SECRET!,
@@ -58,7 +64,7 @@ export class Express {
 
     private async authChecker(action: Action, roles: string[]): Promise<boolean> {
         if (action.request.isAuthenticated()) return true;
-        
+
         action.response.sendStatus(401);
         return false;
     }

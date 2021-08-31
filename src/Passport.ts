@@ -47,7 +47,6 @@ export default class Passport {
         done: oauth2.VerifyCallback
     ): void {
         // TODO: Implement storing user
-        console.log('Passport callback');
         return done(null, profile);
     }
 }
