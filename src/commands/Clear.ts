@@ -3,6 +3,7 @@ import { Container } from 'typedi';
 import { Command } from '../Command';
 import { Player } from '../music/Player';
 import { BotClient } from '../types';
+import { Embedder } from '../utils/Embedder';
 import { Logger } from '../utils/Logger';
 
 export default class Clear extends Command {
@@ -19,13 +20,13 @@ export default class Clear extends Command {
 
     public async run(message: Message): Promise<void> {
         const player = Container.get<Player>(Player);
+        const embedder = Container.get<Embedder>(Embedder);
 
         message.delete();
 
         try {
             player.clear(message.guild?.id!);
-
-            await super.respond(message.channel, `Cleared queue.`);
+            embedder.clear(message.guild?.id!);
         } catch (e: any) {
             if (e.context === 'QueueIsNull') {
                 await super.respond(message.channel, 'Nothing is playing.');

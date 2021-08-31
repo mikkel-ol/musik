@@ -18,4 +18,4 @@ const app = Container.get<Express>(Express);
 
 // ! We have to do this to make sure everything else is setup
 // ! before attaching routes and starting web server
-//app.run();
+app.run();

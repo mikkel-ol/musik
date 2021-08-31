@@ -1,5 +1,6 @@
 export interface PlayRequest {
     guildId: string;
-    channelId: string;
+    voiceChannelId: string;
+    messageChannelId: string;
     song: string;
 }

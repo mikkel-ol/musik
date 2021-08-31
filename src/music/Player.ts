@@ -8,6 +8,7 @@ import { NotFoundError } from 'routing-controllers';
 import { MusicPlayerError } from '../types/errors/MusicPlayerError';
 import { PlayerManager } from '../managers/PlayerManager';
 import { Embedder } from '../utils/Embedder';
+import { GuildNotFoundError } from '../types/errors/GuildNotFoundError';
 
 @Service()
 export class Player {
@@ -97,7 +98,7 @@ export class Player {
 
         const song = queue.skip();
 
-        if (!song) throw new NotFoundError(`Could not skip song on guild with ID ${guildId}`);
+        if (!song) throw new GuildNotFoundError(`Could not skip song on guild with ID ${guildId}`);
 
         return song;
     }
@@ -162,7 +163,7 @@ export class Player {
     public getQueue(guildId: string): Queue {
         const queue = this.player.getQueue(guildId);
 
-        if (!queue) throw new NotFoundError(`Could not find any queue on guild ${guildId}`);
+        if (!queue) throw new GuildNotFoundError(`Could not find any queue on guild ${guildId}`);
 
         return queue;
     }

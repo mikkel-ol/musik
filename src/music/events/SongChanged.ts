@@ -11,7 +11,9 @@ export default class SongChanged implements BotEvent {
     public async run(args: any): Promise<void> {
         const embedder = Container.get<Embedder>(Embedder);
 
-        const [queue, newSong, oldSong]: [Queue, Song, Song] = args;      
+        const [queue, newSong, oldSong]: [Queue, Song, Song] = args;
+
+        if (!queue) return;
 
         await embedder.pop(queue.guild.id);
     }

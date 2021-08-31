@@ -9,6 +9,7 @@ import { Logger } from './utils/Logger';
 import { MusicController } from './api/controllers/MusicController';
 import { ErrorHandler } from './api/middlewares/ErrorHandler';
 import { AuthController } from './api/controllers/AuthController';
+import { UsersController } from './api/controllers/UsersController';
 
 @Service()
 export class Express {
@@ -44,7 +45,7 @@ export class Express {
             routePrefix: '/api',
             defaultErrorHandler: false,
             middlewares: [ErrorHandler],
-            controllers: [AuthController, MusicController],
+            controllers: [AuthController, MusicController, UsersController],
             authorizationChecker: this.authChecker,
             currentUserChecker: (action: Action) => action.request.user
         });
@@ -57,6 +58,8 @@ export class Express {
 
     private async authChecker(action: Action, roles: string[]): Promise<boolean> {
         if (action.request.isAuthenticated()) return true;
-        return action.response.sendStatus(401);
+        
+        action.response.sendStatus(401);
+        return false;
     }
 }

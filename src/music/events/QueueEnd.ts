@@ -13,6 +13,8 @@ export default class QueueEnd implements BotEvent {
 
         const [queue]: [Queue] = args;
 
-        await embedder.pop(queue.guild.id);
+        if (!queue) return;
+
+        embedder.pop(queue.guild.id);
     }
 }

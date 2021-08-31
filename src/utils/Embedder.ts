@@ -8,7 +8,6 @@ import '../extensions/StringExtensions';
 import { Client } from '../Client';
 import { Player } from '../music/Player';
 import { PlayerState } from '../music/PlayerState';
-import { NotFoundError } from 'routing-controllers';
 
 @Service()
 export class Embedder {
@@ -83,6 +82,18 @@ export class Embedder {
         const embedConstr = this.getConstruct(guildId);
 
         embedConstr.queue = [];
+
+        await this.update(guildId);
+    }
+
+    /**
+     * Clears the queue except from current song playing.
+     * @param guildId ID on Guild
+     */
+    public async clear(guildId: string) {
+        const embedConstr = this.getConstruct(guildId);
+
+        embedConstr.queue = [ embedConstr.queue.shift()! ];
 
         await this.update(guildId);
     }
@@ -210,7 +221,7 @@ export class Embedder {
     private getConstruct(guildId: string) {
         const embedConstr = this.embedMap.get(guildId);
 
-        if (!embedConstr) throw new NotFoundError(`Could not find guild with ID ${guildId}`);
+        if (!embedConstr) throw new GuildNotFoundError(`Could not find guild with ID ${guildId}`);
 
         return embedConstr;
     }
