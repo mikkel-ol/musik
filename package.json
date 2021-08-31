@@ -20,7 +20,7 @@
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "cookie-parser": "^1.4.5",
-    "discord-music-player": "^8.0.1",
+    "discord-music-player": "^8.0.2",
     "discord.js": "^13.1.0",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
