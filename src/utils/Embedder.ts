@@ -18,7 +18,13 @@ export class Embedder {
         this.embedMap = new Map<string, EmbedConstruct>();
     }
 
-    public async add(guildId: string, song: Song, channelId: string) {
+    /**
+     * Adds a song to the embedded message.
+     * @param guildId ID on Guild
+     * @param song Song to add
+     * @param channelId OPTIONAL - ID on channel to initiate message
+     */
+    public async add(guildId: string, song: Song, channelId?: string) {
         let embedConstr = this.embedMap.get(guildId);
 
         if (!embedConstr) {
@@ -33,6 +39,10 @@ export class Embedder {
         await this.update(guildId);
     }
 
+    /**
+     * Removes the next song in queue from the embedded message.
+     * @param guildId ID on Guild
+     */
     public async pop(guildId: string) {
         const embedConstr = this.getConstruct(guildId);
 
@@ -41,6 +51,10 @@ export class Embedder {
         await this.update(guildId);
     }
 
+    /**
+     * Sets the status to paused.
+     * @param guildId ID on Guild
+     */
     public async pause(guildId: string) {
         const embedConstr = this.getConstruct(guildId);
 
@@ -49,6 +63,10 @@ export class Embedder {
         await this.update(guildId);
     }
 
+    /**
+     * Sets the status to playing.
+     * @param guildId ID on Guild
+     */
     public async resume(guildId: string) {
         const embedConstr = this.getConstruct(guildId);
 
@@ -57,6 +75,10 @@ export class Embedder {
         await this.update(guildId);
     }
 
+    /**
+     * Clears the queue and sets status to stopped.
+     * @param guildId ID on Guild
+     */
     public async stop(guildId: string) {
         const embedConstr = this.getConstruct(guildId);
 
@@ -65,6 +87,10 @@ export class Embedder {
         await this.update(guildId);
     }
 
+    /**
+     * Updates the embed message with current status.
+     * @param guildId ID on Guild
+     */
     public async update(guildId: string) {
         const player = Container.get<Player>(Player);
         

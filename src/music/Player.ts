@@ -37,7 +37,7 @@ export class Player {
 
         try {
             queue = this.getQueue(guildId);
-        } catch(e) {
+        } catch (e) {
             queue = this.player.createQueue(guildId);
         }
 
@@ -101,7 +101,7 @@ export class Player {
 
         return song;
     }
-    
+
     public shuffle(guildId: string): Song[] {
         const queue = this.getQueue(guildId);
 
@@ -115,7 +115,7 @@ export class Player {
     public volume(guildId: string, volume?: number): number {
         const queue = this.getQueue(guildId);
 
-        if (!volume) return queue.volume * 2 // ! weird half thing;
+        if (!volume) return queue.volume;
         else {
             // TODO: Check if volume is between 0 and 100
 
@@ -150,15 +150,15 @@ export class Player {
                 clearInterval(timer);
             }
 
-            const tempVolume = currentVol + (diff / noOfSteps) * i;            
-            
+            const tempVolume = currentVol + (diff / noOfSteps) * i;
+
             queue.setVolume(tempVolume);
             if (i % 6 === 0 || !status.isFading) embedder.update(guildId);
         }, this.client.settings.fadeTime / noOfSteps);
 
         return volume;
     }
-    
+
     public getQueue(guildId: string): Queue {
         const queue = this.player.getQueue(guildId);
 
