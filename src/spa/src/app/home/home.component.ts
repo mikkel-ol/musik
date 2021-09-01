@@ -19,7 +19,6 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     setInterval(() =>
-      this.placeholder$.next(this.placeholders[Math.floor(Math.random() * this.placeholders.length)])
-      , 10000);
+      this.placeholder$.next(this.placeholders[Math.floor(Math.random() * this.placeholders.length)]), 10000);
   }
 }
