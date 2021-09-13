@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Message } from 'discord.js';
 import { Container } from 'typedi';
 import { Command } from '../Command';
@@ -28,7 +29,7 @@ export default class Stop extends Command {
             if (!player.isPlaying(message.guild?.id)) {
                 await super.respond(message.channel, 'Nothing is playing.');
             } else {
-                await player.stop(message.guild?.id!);
+                player.stop(message.guild?.id!);
                 await embedder.stop(message.guild?.id!);
             }
         } catch (e: any) {

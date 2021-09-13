@@ -14,7 +14,7 @@ export default class Play extends Command {
             description: 'Plays a song.',
             category: 'Command',
             usage: client.settings.prefix.concat('play'),
-            cooldown: 1000,
+            cooldown: 200,
             requiredPermissions: ['SEND_MESSAGES']
         });
     }
@@ -32,11 +32,15 @@ export default class Play extends Command {
 
         args.shift();
 
-        const search = args.join(" ");
+        const search = args.join(' ');
 
         try {
-            const song = await player.play(search, message.guild?.id!, message.member?.voice.channelId!);
-            
+            const song = await player.play(
+                search,
+                message.guild?.id!,
+                message.member?.voice.channelId!
+            );
+
             await embedder.add(message.guild?.id!, song, message.channel?.id!);
         } catch (e: any) {
             if (e.context === 'VoiceChannelTypeInvalid') {

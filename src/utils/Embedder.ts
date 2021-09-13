@@ -93,7 +93,7 @@ export class Embedder {
     public async clear(guildId: string) {
         const embedConstr = this.getConstruct(guildId);
 
-        embedConstr.queue = [ embedConstr.queue.shift()! ];
+        embedConstr.queue = [embedConstr.queue.shift()!];
 
         await this.update(guildId);
     }
@@ -102,28 +102,29 @@ export class Embedder {
      * Updates the embed message with current status.
      * @param guildId ID on Guild
      */
-    public async update(guildId: string) {
+    public async update(guildId: string): Promise<void> {
         const player = Container.get<Player>(Player);
-        
+
         const embedConstr = this.embedMap.get(guildId);
 
         if (!embedConstr) throw new GuildNotFoundError(`Could not find guild with ID ${guildId}`);
 
-        const embed = embedConstr.embed;
+        const { embed } = embedConstr;
 
         if (embedConstr.queue.length === 0) {
             embedConstr.state = PlayerState.STOPPED;
 
-            embed
-                .setThumbnail("")
-                .setTitle("")
-                .setURL("")
-                .setAuthor(embedConstr.state!, this.client.user?.avatarURL()!)
-                .setFooter("");
+            embed.fields = [];
 
+            embed
+                .setThumbnail('')
+                .setTitle('')
+                .setURL('')
+                .setAuthor(embedConstr.state!, this.client.user?.avatarURL()!)
+                .setFooter('');
         } else {
             if (embedConstr.queue.length === 1) embed.fields.pop(); // removes queue field
-            
+
             const currentSong = embedConstr.queue[0];
 
             const title = this.makeSongTitle(currentSong);
@@ -191,7 +192,7 @@ export class Embedder {
     private makeQueueField(embedConstr: EmbedConstruct): EmbedField | undefined {
         if (embedConstr.queue.length <= 1) return undefined;
 
-        let queueField = {
+        const queueField = {
             name: 'Queue:',
             value: '',
             inline: false
@@ -202,6 +203,7 @@ export class Embedder {
             queueField.value += `${i}: ${embedConstr.queue[i].name.shorten(50)}\n`;
         }
 
+        // eslint-disable-next-line no-param-reassign
         embedConstr.embed.fields[0] = queueField;
 
         return queueField;
